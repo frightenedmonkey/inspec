@@ -9,6 +9,7 @@ group :test do
   gem 'rubocop', '~> 0.36.0'
   gem 'simplecov', '~> 0.10'
   gem 'concurrent-ruby', '~> 0.9'
+  gem 'mixlib-shellout', '~> 2.2.5'
 end
 
 group :integration do
