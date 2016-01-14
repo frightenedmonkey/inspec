@@ -1,12 +1,16 @@
 driver:
   name: ec2
   region: eu-central-1
-  instance_type: m3.large
+  instance_type: m3.medium
   associate_public_ip: true
+  security_group_ids: ["travis-ci"]
   interface: dns
+  aws_access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
+  aws_secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
+  aws_ssh_key_id: <%= ENV['AWS_KEYPAIR_NAME'] %>
 
 transport:
-  ssh_key: /path/to/aws.pem
+  ssh_key: <%= ENV['EC2_SSH_KEY_PATH'] %>
   username: ec2-user
 
 platforms:
