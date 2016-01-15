@@ -11,10 +11,7 @@ if os.linux?
     it { should_not exist }
     its('gid') { should eq nil }
   end
-end
-
-if os[:family] == 'freebsd'
-
+elsif os[:family] == 'freebsd'
   describe group('wheel') do
     it { should exist }
     its('gid') { should eq 0 }
@@ -29,9 +26,7 @@ if os[:family] == 'freebsd'
     it { should_not exist }
     its('gid') { should eq nil }
   end
-end
-
-if os[:family] == 'aix'
+elsif os[:family] == 'aix'
   describe group('system') do
     it { should exist }
     its('gid') { should eq 0 }
