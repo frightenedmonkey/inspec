@@ -116,7 +116,15 @@ if os.unix?
     its('group') { should eq filedata[:group] }
     its('type') { should eq :directory }
   end
+elsif os.windows?
+  describe file('C:\\Windows') do
+    it { should exist }
+    it { should be_directory }
+  end
+end
 
+# check file mount on linux
+if os.linux?
   # for server spec compatibility
   # Do not use `.with` or `.only_with`, this syntax is deprecated and will be removed
   # in InSpec version 1
@@ -139,11 +147,5 @@ if os.unix?
         :ro=>true}
       })
     }
-  end
-
-elsif os.windows?
-  describe file('C:\\Windows') do
-    it { should exist }
-    it { should be_directory }
   end
 end
