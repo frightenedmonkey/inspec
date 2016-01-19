@@ -10,9 +10,12 @@ require 'inspec/profile_context'
 require 'inspec/targets'
 require 'inspec/metadata'
 # spec requirements
+require 'forwardable'
 
 module Inspec
   class Runner # rubocop:disable Metrics/ClassLength
+    extend Forwardable
+
     attr_reader :backend, :rules
     def initialize(conf = {})
       @rules = {}
@@ -39,6 +42,11 @@ module Inspec
       }
       res
     end
+
+    # NOTE(sr) this is still RSpec-specific
+    def_delegator :@test_collector, :add_formatter
+    def_delegator :@test_collector, :error_stream=
+    def_delegator :@test_collector, :output_stream=
 
     def configure_transport
       @backend = Inspec::Backend.create(@conf)
@@ -106,6 +114,18 @@ module Inspec
       end
     end
 
+    # add tests given in form of a block, e.g. Proc.new { control 'test1' do ... }
+    # TODO(sr) deduplication with #add_content
+    def add_block(block, title = nil)
+      return unless block
+
+      ctx = create_context
+      ctx.load_block(block, block.source_location[0], block.source_location[1], title)
+      ctx.rules.each do |rule_id, rule|
+        register_rule(rule_id, rule, title)
+      end
+    end
+
     def run(with = nil)
       @test_collector.run(with)
     end
@@ -141,7 +161,7 @@ module Inspec
       nil
     end
 
-    def register_rule(rule_id, rule)
+    def register_rule(rule_id, rule, title = nil)
       @rules[rule_id] = rule
       checks = rule.instance_variable_get(:@checks)
       checks.each do |m, a, b|
@@ -157,7 +177,7 @@ module Inspec
         dsl = Inspec::Resource.create_dsl(backend)
         example.send(:include, dsl)
 
-        @test_collector.add_test(example, rule_id)
+        @test_collector.add_test(example, rule_id, title)
       end
     end
   end

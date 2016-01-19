@@ -20,6 +20,30 @@ module Inspec
       configure_output
     end
 
+    # Configure formatters
+    #
+    # @param [Type] formatter An output formatter for RSpec
+    # @return [nil]
+    def add_formatter(formatter)
+      RSpec.configuration.add_formatter(formatter)
+    end
+
+    # Configure output stream
+    #
+    # @param [Type] stream An output stream for RSpec
+    # @return [nil]
+    def output_stream=(stream)
+      RSpec.configuration.output_stream=(stream)
+    end
+
+    # Configure error stream
+    #
+    # @param [Type] stream An error stream for RSpec
+    # @return [nil]
+    def error_stream=(stream)
+      RSpec.configuration.error_stream=(stream)
+    end
+
     # Create a new RSpec example group from arguments and block.
     #
     # @param [Type] *args list of arguments for this example
@@ -34,8 +58,9 @@ module Inspec
     # @param [RSpecExampleGroup] example test
     # @param [String] rule_id the ID associated with this check
     # @return [nil]
-    def add_test(example, rule_id)
+    def add_test(example, rule_id, title = nil)
       set_rspec_ids(example, rule_id)
+      set_group_title(example, title) if title
       @tests.register(example)
     end
 
@@ -57,7 +82,7 @@ module Inspec
 
     private
 
-    # Empty the list of registered tests.
+    # Empty the list of registered tests and reset RSpec.configuration
     #
     # @return [nil]
     def reset_tests
@@ -67,6 +92,7 @@ module Inspec
     end
 
     # Configure the output formatter and stream to be used with RSpec.
+    # TODO(sr) ...stream?
     #
     # @return [nil]
     def configure_output
@@ -80,7 +106,6 @@ module Inspec
     #
     # @param [RSpecExampleGroup] example object which contains a check
     # @param [Type] id describe id
-    # @return [Type] description of returned object
     def set_rspec_ids(example, id)
       example.metadata[:id] = id
       example.filtered_examples.each do |e|
@@ -88,6 +113,16 @@ module Inspec
       end
       example.children.each do |child|
         set_rspec_ids(child, id)
+      end
+    end
+
+    def set_group_title(example, title)
+      example.metadata[:group_title] = title
+      example.filtered_examples.each do |e|
+        e.metadata[:group_title] = title
+      end
+      example.children.each do |child|
+        set_group_title(child, title)
       end
     end
   end

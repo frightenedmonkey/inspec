@@ -34,6 +34,12 @@ module Inspec
       @profile_context.instance_eval(content, source || 'unknown', line || 1)
     end
 
+    def load_block(p, source = 'unknown', line = 1, title = nil)
+      @current_load = { file: source } # TODO(sr): collect line_no
+      @current_load[:title] = title if title # TODO(sr): add that for load(content, ..) above?
+      @profile_context.instance_eval &p
+    end
+
     def unregister_rule(id)
       full_id = Inspec::Rule.full_id(@profile_id, id)
       @rules[full_id] = nil
